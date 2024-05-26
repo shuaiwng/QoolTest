@@ -1,0 +1,12 @@
+<Root>
+    <General>
+        <Version>1.0.0</Version>
+    </General>
+    <UID-1>
+        <Info Name="Test Installation" Level="1" isTestCase="YES" TestType="Smoke" Comment="Deivce is already connected."/>
+        <TestCase>
+            <StepIn>Press the start button.</StepIn>
+            <StepOut>Live View is working.</StepOut>
+        </TestCase>
+    </UID-1>
+</Root>
