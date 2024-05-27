@@ -7,39 +7,17 @@
 int main(int argc, char *argv[]){
     QApplication app(argc, argv);
 
+    Project prj;
+    std::vector<Node_info_t> node_vec = prj.openProject();
+
+    int max_level = prj.getMaxLevel();
+
     MainWindow main_window;
 
-    Project prj;
-    prj.openProject();
 
-    // QTreeView* treeView = new QTreeView();
-    // QStandardItemModel* standardModel = new QStandardItemModel();
-    // QStandardItem *rootNode = standardModel->invisibleRootItem();
+    main_window.showWindow();
 
-    // //defining a couple of items
-    // QStandardItem *americaItem = new QStandardItem("America");
-    // americaItem->setIcon(QIcon("assets/testIcon.png"));
-    // QStandardItem *mexicoItem =  new QStandardItem("Canada");
-    // QStandardItem *usaItem =     new QStandardItem("USA");
-    // QStandardItem *bostonItem =  new QStandardItem("Boston");
-    // QStandardItem *europeItem =  new QStandardItem("Europe");
-    // QStandardItem *italyItem =   new QStandardItem("Italy");
-    // QStandardItem *romeItem =    new QStandardItem("Rome");
-    // QStandardItem *veronaItem =  new QStandardItem("Verona");
-
-    // //building up the hierarchy
-    // rootNode->    appendRow(americaItem);
-    // rootNode->    appendRow(europeItem);
-    // americaItem-> appendRow(mexicoItem);
-    // americaItem-> appendRow(usaItem);
-    // usaItem->     appendRow(bostonItem);
-    // europeItem->  appendRow(italyItem);
-    // italyItem->   appendRow(romeItem);
-    // italyItem->   appendRow(veronaItem);
-
-    // //register the model
-    // treeView->setModel(standardModel);
-    // // treeView->expandAll();
+    main_window.showTestCaseTree(node_vec, max_level);
 
 
 

@@ -1,7 +1,8 @@
 #include "tinyxml2/tinyxml2.h"
 #include "project.h"
 #include <iostream>
-#include <vector>>
+#include <vector>
+#include <memory>
 
 using namespace tinyxml2;
 
@@ -16,41 +17,45 @@ Project::~Project()
 }
 
 
-bool Project::openProject()
+std::vector<Node_info_t> Project::openProject()
 {
-    // tinyxml test
-    XMLDocument xmlDoc;
-    XMLNode * pRoot = xmlDoc.NewElement("Root");
-    xmlDoc.InsertFirstChild(pRoot);
-    XMLElement * pGeneral = xmlDoc.NewElement("General");
-    XMLElement * pVersion = xmlDoc.NewElement("Version");
-    pVersion->SetText("1.0.0");
-    pGeneral->InsertEndChild(pVersion);
-    pRoot->InsertEndChild(pGeneral);
 
-    XMLElement * pTest_1 = xmlDoc.NewElement("UID-1");
-    XMLElement * pInfo = xmlDoc.NewElement("Info");
-    pInfo->SetAttribute("Name", "Test Installation");
-    pInfo->SetAttribute("Level", "1");
-    pInfo->SetAttribute("isTestCase", "YES");
-    pInfo->SetAttribute("TestType", "Smoke");
-    pInfo->SetAttribute("Comment", "Deivce is already connected.");
-    pTest_1->InsertEndChild(pInfo);
+    XMLDocument xml_doc;
+    xml_doc.LoadFile("../../tests/testdata/qooltest_project.qlpj");
+    XMLElement* dataElm = xml_doc.FirstChildElement("Root");
 
-    XMLElement * pTestCase = xmlDoc.NewElement("TestCase");
-    XMLElement * pStepIn = xmlDoc.NewElement("StepIn");
-    pStepIn->SetText("Press the start button.");
-    XMLElement * pStepOut = xmlDoc.NewElement("StepOut");
-    pStepOut->SetText("Live View is working.");
-    pTestCase->InsertEndChild(pStepIn);
-    pTestCase->InsertEndChild(pStepOut);
-    pTest_1->InsertEndChild(pTestCase);
+    m_max_level = 0;
+    std::vector<Node_info_t> info_vec;
+    for (XMLElement* nodeElm = dataElm->FirstChildElement("Node");
+         nodeElm != NULL; nodeElm = nodeElm->NextSiblingElement())
+    {
+        Node_info_t pNodeInfo;
+        XMLElement* infoElm = nodeElm->FirstChildElement("Info");
+        pNodeInfo.name = infoElm->Attribute("Name");
+        pNodeInfo.level = std::stoi(std::string(infoElm->Attribute("Level")));
+        if (std::string(infoElm->Attribute("isTestCase")) == "YES"){
+            pNodeInfo.isTestCase = true;
+        } else {
+            pNodeInfo.isTestCase = false;
+        }
+        pNodeInfo.testType = infoElm->Attribute("TestType");
+        pNodeInfo.comment = infoElm->Attribute("Comment");
+        pNodeInfo.uid = std::stoi(std::string(infoElm->Attribute("UID")));
 
-    pRoot->InsertEndChild(pTest_1);
+        info_vec.push_back(pNodeInfo);
 
-    xmlDoc.SaveFile("SavedData.xml");
+        // find max level
+        if (m_max_level < pNodeInfo.level){
+            m_max_level = pNodeInfo.level;
+        }
+    }
+
+    return info_vec;
+}
 
 
-    return true;
+int Project::getMaxLevel()
+{
+    return m_max_level;
 }
 
