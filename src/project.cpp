@@ -17,7 +17,7 @@ Project::~Project()
 }
 
 
-std::vector<Node_info_t> Project::openProject()
+std::vector<Node_data_t> Project::openProject()
 {
 
     XMLDocument xml_doc;
@@ -25,32 +25,43 @@ std::vector<Node_info_t> Project::openProject()
     XMLElement* dataElm = xml_doc.FirstChildElement("Root");
 
     m_max_level = 0;
-    std::vector<Node_info_t> info_vec;
+    std::vector<Node_data_t> data_vec;
     for (XMLElement* nodeElm = dataElm->FirstChildElement("Node");
          nodeElm != NULL; nodeElm = nodeElm->NextSiblingElement())
     {
-        Node_info_t pNodeInfo;
+        Node_data_t pNodeData;
         XMLElement* infoElm = nodeElm->FirstChildElement("Info");
-        pNodeInfo.name = infoElm->Attribute("Name");
-        pNodeInfo.level = std::stoi(std::string(infoElm->Attribute("Level")));
+        pNodeData.name = infoElm->Attribute("Name");
+        pNodeData.level = std::stoi(std::string(infoElm->Attribute("Level")));
         if (std::string(infoElm->Attribute("isTestCase")) == "YES"){
-            pNodeInfo.isTestCase = true;
+            pNodeData.isTestCase = true;
         } else {
-            pNodeInfo.isTestCase = false;
+            pNodeData.isTestCase = false;
         }
-        pNodeInfo.testType = infoElm->Attribute("TestType");
-        pNodeInfo.comment = infoElm->Attribute("Comment");
-        pNodeInfo.uid = std::stoi(std::string(infoElm->Attribute("UID")));
+        pNodeData.testType = infoElm->Attribute("TestType");
+        pNodeData.comment = infoElm->Attribute("Comment");
+        pNodeData.uid = std::stoi(std::string(infoElm->Attribute("UID")));
+        pNodeData.full_name = "UID-" + std::to_string(pNodeData.uid) + ": " + pNodeData.name;
 
-        info_vec.push_back(pNodeInfo);
+        XMLElement* testcase = nodeElm->FirstChildElement("TestCase");
+        if(testcase){
+            for (XMLElement* step = testcase->FirstChildElement("StepIn");
+                 step != NULL; step = step->NextSiblingElement("StepIn"))
+            {
+                pNodeData.testdata.push_back(std::make_pair(step->GetText(),
+                                                            step->NextSiblingElement()->GetText()));
+            }
+        }
+
+        data_vec.push_back(pNodeData);
 
         // find max level
-        if (m_max_level < pNodeInfo.level){
-            m_max_level = pNodeInfo.level;
+        if (m_max_level < pNodeData.level){
+            m_max_level = pNodeData.level;
         }
     }
 
-    return info_vec;
+    return data_vec;
 }
 
 

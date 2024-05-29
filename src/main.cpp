@@ -8,16 +8,17 @@ int main(int argc, char *argv[]){
     QApplication app(argc, argv);
 
     Project prj;
-    std::vector<Node_info_t> node_vec = prj.openProject();
+    std::vector<Node_data_t> data_vec = prj.openProject();
 
     int max_level = prj.getMaxLevel();
 
     MainWindow main_window;
+    main_window.getProjectData(data_vec);
 
 
     main_window.showWindow();
 
-    main_window.showTestCaseTree(node_vec, max_level);
+    main_window.showTestCaseTree(data_vec, max_level);
 
 
 

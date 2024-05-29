@@ -4,10 +4,13 @@
         <Version>1.0.0</Version>
     </General>
     <Node>
-        <Info UID="1" Name="GUI Elements" Level="1" isTestCase="NO" TestType="Smoke" Comment="Subfolder containing test cases."/>
+        <Info UID="45" Name="GUI Elements" Level="1" isTestCase="NO" TestType="Smoke" Comment="Subfolder containing test cases."/>
     </Node>
     <Node>
-        <Info UID="2" Name="test liveview" Level="2" isTestCase="YES" TestType="Smoke" Comment="Deivce is already connected."/>
+        <Info UID="12" Name="Liveview" Level="2" isTestCase="NO" TestType="Smoke" Comment="LiveView test suite."/>
+    </Node>
+    <Node>
+        <Info UID="368" Name="test liveview" Level="3" isTestCase="YES" TestType="Smoke" Comment="Deivce is already connected."/>
         <TestCase>
             <StepIn>Press the start button.</StepIn>
             <StepOut>Live View is working.</StepOut>
@@ -25,15 +28,24 @@
         </TestCase>
     </Node>
     <Node>
-        <Info UID="4" Name="Project Handling" Level="1" isTestCase="NO" TestType="Smoke" Comment=""/>
+        <Info UID="84" Name="Project Handling" Level="1" isTestCase="NO" TestType="Smoke" Comment=""/>
     </Node>
     <Node>
-        <Info UID="5" Name="Load/Save project" Level="1" isTestCase="YES" TestType="Smoke" Comment="Load and save project."/>
+        <Info UID="15" Name="Load/Save project" Level="2" isTestCase="YES" TestType="Functional" Comment="Load and save project."/>
         <TestCase>
             <StepIn>open project.</StepIn>
             <StepOut>project can be opened</StepOut>
             <StepIn>save project.</StepIn>
             <StepOut>project has been saved.</StepOut>
+        </TestCase>
+    </Node>
+    <Node>
+        <Info UID="53" Name="Compatibility" Level="1" isTestCase="YES" TestType="Acceptance" Comment="Results from previous version are saved."/>
+        <TestCase>
+            <StepIn>import results saved from a previous version.</StepIn>
+            <StepOut>results are shown correctly in the new version.</StepOut>
+            <StepIn>save results in the new version, reload results.</StepIn>
+            <StepOut>results can be saved and imported in the new version.</StepOut>
         </TestCase>
     </Node>
 </Root>
