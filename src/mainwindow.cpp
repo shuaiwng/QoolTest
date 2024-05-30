@@ -1,33 +1,61 @@
 #include "mainwindow.h"
-#include <QtUiTools/QtUiTools>
-#include <QtUiTools/QUiLoader>
+#include <QtUiTools>
 
 
 MainWindow::MainWindow()
 {
-    QFile file("assets/main.ui");
+    QFile file("assets/gui_main.ui");
     file.open(QIODevice::ReadOnly);
     QUiLoader loader;
     m_mainwindow = loader.load(&file, this);
     file.close();
 
+    m_menu_close = m_mainwindow->findChild<QAction*>("actionClose");
+    m_menu_openProj = m_mainwindow->findChild<QAction*>("actionOpen_Project");
+
     m_tv_testcase = m_mainwindow->findChild<QTreeView*>("tv_testcase");
     m_lb_uid = m_mainwindow->findChild<QLabel*>("lb_uid");
     m_te_comment = m_mainwindow->findChild<QTextEdit*>("te_comment");
     m_cb_testtype = m_mainwindow->findChild<QComboBox*>("cb_testtype");
-    m_gb_testarea = m_mainwindow->findChild<QGroupBox*>("gb_testarea");
+    m_tw_testarea = m_mainwindow->findChild<QTableWidget*>("tw_testarea");
+    m_tw_testarea->setColumnCount(2);
+    QTableWidgetItem *headerIn = new QTableWidgetItem();
+    headerIn->setText("Step:");
+    QTableWidgetItem *headerOut = new QTableWidgetItem();
+    headerOut->setText("Test Result:");
+    m_tw_testarea->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_tw_testarea->setHorizontalHeaderItem(0, headerIn);
+    m_tw_testarea->setHorizontalHeaderItem(1, headerOut);
 
     connect(m_tv_testcase,SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
+    connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
+    connect(m_menu_openProj, SIGNAL(triggered()), this, SLOT(openProject()));
+
+    m_mainwindow->show();
 }
 
 MainWindow::~MainWindow()
 {
+
 }
 
-void MainWindow::getProjectData(std::vector<Node_data_t> data)
+
+void MainWindow::openProject()
 {
-    m_data_vec = data;
+    QString fileName = QFileDialog::getOpenFileName(this,
+                                            tr("Open Project"), ".", tr("Project File (*.qlpj)"));
+    m_proj = new Project;
+    m_proj->openProject(fileName.toStdString().c_str());
+    this->showTestCaseTree(m_proj->data());
 }
+
+
+void MainWindow::closeApp()
+{
+    m_mainwindow->close();
+    qApp->quit();
+}
+
 
 void MainWindow::displayTestCase()
 {
@@ -35,7 +63,7 @@ void MainWindow::displayTestCase()
     m_lb_uid->setText(uid);
 
     Node_data_t data_selected;
-    for (auto & data : m_data_vec)
+    for (auto & data : m_proj->data()->node_data)
     {
         if (data.uid == std::stoi(uid.toStdString().c_str())){
             data_selected = data;
@@ -45,37 +73,31 @@ void MainWindow::displayTestCase()
     m_cb_testtype->addItem(QString::fromStdString(data_selected.testType));
     m_te_comment->setText(QString::fromStdString(data_selected.comment));
 
-    // display detailed test steps
-    QVBoxLayout * lay_total = new QVBoxLayout;
-    delete m_gb_testarea->layout();
-    for (auto & teststep : data_selected.testdata){
-        QHBoxLayout* lay_step = new QHBoxLayout;
-        QTextEdit * stepIn = new QTextEdit;
-        QTextEdit * stepOut = new QTextEdit;
-        stepIn->setText(QString::fromStdString(std::get<0>(teststep)));
-        stepOut->setText(QString::fromStdString(std::get<1>(teststep)));
-        lay_step->addWidget(stepIn);
-        lay_step->addSpacing(30);
-        lay_step->addWidget(stepOut);
+    m_tw_testarea->setRowCount(0);
+    for (int i_row=0; i_row<data_selected.testdata.size(); i_row++){
+        m_tw_testarea->insertRow(i_row);
 
-        lay_total->addLayout(lay_step);
-        lay_total->addSpacing(30);
+        QTableWidgetItem* m_stepIn = new QTableWidgetItem;
+        QTableWidgetItem* m_stepOut = new QTableWidgetItem;
+        m_stepIn->setText(QString::fromStdString(std::get<0>(data_selected.testdata[i_row])));
+        m_stepOut->setText(QString::fromStdString(std::get<1>(data_selected.testdata[i_row])));
+
+        m_tw_testarea->setItem(i_row, 0, m_stepIn);
+        m_tw_testarea->setItem(i_row, 1, m_stepOut);
     }
-    m_gb_testarea->setLayout(lay_total);
+
 }
 
-void MainWindow::showWindow()
-{
-    m_mainwindow->show();
-}
 
-bool MainWindow::showTestCaseTree(std::vector<Node_data_t> data_vec, int max_level)
+bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
 {
+    m_tv_testcase->setModel(nullptr);
+
     QStandardItemModel* standardModel = new QStandardItemModel();
     QStandardItem* rootNode = standardModel->invisibleRootItem();
 
-    std::vector<QStandardItem*> lastItemPerLevel(max_level+1);
-    for(auto & elm : data_vec)
+    std::vector<QStandardItem*> lastItemPerLevel(proj_data->max_level+1);
+    for(auto & elm : proj_data->node_data)
     {
         QStandardItem * testItem = new QStandardItem(elm.full_name.c_str());
         lastItemPerLevel[elm.level] = testItem;
@@ -96,7 +118,5 @@ bool MainWindow::showTestCaseTree(std::vector<Node_data_t> data_vec, int max_lev
 
     m_tv_testcase->setModel(standardModel);
 
-
     return true;
-
 }

@@ -16,21 +16,25 @@ struct Node_data_t{
     std::vector<std::tuple<std::string, std::string>> testdata;
 };
 
+struct Project_data_t{
+    std::vector<Node_data_t> node_data;
+    int max_level;
+};
+
+
 class Project
 {
 public:
     Project();
     ~Project();
 
-    std::vector<Node_data_t> openProject();
-    // bool closeProject();
+    void openProject(const char *);
     // bool updateProject();
 
-    int getMaxLevel();
+    Project_data_t * data();
 
 
 private:
-    std::string m_version;
-    int m_max_level;
+    Project_data_t m_project_data;
 
 };

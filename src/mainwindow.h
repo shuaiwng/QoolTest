@@ -2,7 +2,8 @@
 #include <QtWidgets>
 #include "project.h"
 
-class MainWindow : public QMainWindow
+
+class MainWindow : public QWidget
 {
     Q_OBJECT
 
@@ -10,20 +11,24 @@ public:
     MainWindow();
     ~MainWindow();
 
-    void showWindow();
-    bool showTestCaseTree(std::vector<Node_data_t> data_vec, int max_level);
-    void getProjectData(std::vector<Node_data_t>);
+    bool showTestCaseTree(Project_data_t * proj_data);
 
 public slots:
     void displayTestCase();
+    void closeApp();
+    void openProject();
 
 private:
+    QAction * m_menu_close;
+    QAction * m_menu_openProj;
+    QAction * m_menu_closeProj;
+
     QWidget * m_mainwindow;
     QTreeView* m_tv_testcase;
     QLabel* m_lb_uid;
     QTextEdit* m_te_comment;
     QComboBox* m_cb_testtype;
-    QGroupBox* m_gb_testarea;
+    QTableWidget* m_tw_testarea;
 
-    std::vector<Node_data_t> m_data_vec;
+    Project * m_proj;
 };

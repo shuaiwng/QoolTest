@@ -22,6 +22,7 @@ set (HEADER_FILES
 )
 
 
+set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 
 add_executable(qooltest ${SOURCE_FILES} ${HEADER_FILES} ${TINYXML_FILE})

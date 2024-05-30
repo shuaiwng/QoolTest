@@ -14,19 +14,6 @@
    <string>QoolTest</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QGroupBox" name="gb_testarea">
-    <property name="geometry">
-     <rect>
-      <x>290</x>
-      <y>110</y>
-      <width>881</width>
-      <height>731</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Testcase</string>
-    </property>
-   </widget>
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
@@ -54,7 +41,7 @@
      <rect>
       <x>573</x>
       <y>21</y>
-      <width>551</width>
+      <width>571</width>
       <height>99</height>
      </rect>
     </property>
@@ -136,6 +123,19 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </rect>
     </property>
    </widget>
+   <widget class="QTableWidget" name="tw_testarea">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>150</y>
+      <width>881</width>
+      <height>701</height>
+     </rect>
+    </property>
+    <property name="columnCount">
+     <number>0</number>
+    </property>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -152,7 +152,6 @@ li.checked::marker { content: &quot;\2612&quot;; }
     </property>
     <addaction name="actionOpen_Project"/>
     <addaction name="actionSave_Project"/>
-    <addaction name="actionClose_Project"/>
     <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuTest">

@@ -17,15 +17,13 @@ Project::~Project()
 }
 
 
-std::vector<Node_data_t> Project::openProject()
+void Project::openProject(const char * proj_path)
 {
-
     XMLDocument xml_doc;
-    xml_doc.LoadFile("../../tests/testdata/qooltest_project.qlpj");
+    xml_doc.LoadFile(proj_path);
     XMLElement* dataElm = xml_doc.FirstChildElement("Root");
 
-    m_max_level = 0;
-    std::vector<Node_data_t> data_vec;
+    int max_level = 0;
     for (XMLElement* nodeElm = dataElm->FirstChildElement("Node");
          nodeElm != NULL; nodeElm = nodeElm->NextSiblingElement())
     {
@@ -52,21 +50,18 @@ std::vector<Node_data_t> Project::openProject()
                                                             step->NextSiblingElement()->GetText()));
             }
         }
-
-        data_vec.push_back(pNodeData);
+        m_project_data.node_data.push_back(pNodeData);
 
         // find max level
-        if (m_max_level < pNodeData.level){
-            m_max_level = pNodeData.level;
+        if (max_level < pNodeData.level){
+            max_level = pNodeData.level;
         }
     }
-
-    return data_vec;
+    m_project_data.max_level = max_level;
 }
 
 
-int Project::getMaxLevel()
+Project_data_t * Project::data()
 {
-    return m_max_level;
+    return & m_project_data;
 }
-
