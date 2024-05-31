@@ -1,16 +1,12 @@
-<?xml version="1.0"?>
 <Root>
-    <General>
-        <Version>1.0.0</Version>
-    </General>
     <Node>
-        <Info UID="45" Name="GUI Elements" Level="1" isTestCase="NO" TestType="Smoke" Comment="Subfolder containing test cases."/>
+        <Info UID="45" Name="GUI Elements" Level="1" isTestCase="0" TestType="Smoke" Comment="Subfolder containing test cases."/>
     </Node>
     <Node>
-        <Info UID="12" Name="Liveview" Level="2" isTestCase="NO" TestType="Smoke" Comment="LiveView test suite."/>
+        <Info UID="12" Name="Liveview" Level="2" isTestCase="0" TestType="Smoke" Comment="LiveView test suite."/>
     </Node>
     <Node>
-        <Info UID="368" Name="test liveview" Level="3" isTestCase="YES" TestType="Smoke" Comment="Deivce is already connected."/>
+        <Info UID="368" Name="test liveview" Level="3" isTestCase="1" TestType="Smoke" Comment="Deivce is already connected."/>
         <TestCase>
             <StepIn>Press the start button.</StepIn>
             <StepOut>Live View is working.</StepOut>
@@ -19,7 +15,7 @@
         </TestCase>
     </Node>
     <Node>
-        <Info UID="3" Name="test analysis" Level="2" isTestCase="YES" TestType="Smoke" Comment="Analysis project opened."/>
+        <Info UID="3" Name="test analysis" Level="2" isTestCase="1" TestType="Smoke" Comment="Analysis project opened."/>
         <TestCase>
             <StepIn>Add gaussian filter and press apply.</StepIn>
             <StepOut>Image is applied with filter.</StepOut>
@@ -28,10 +24,10 @@
         </TestCase>
     </Node>
     <Node>
-        <Info UID="84" Name="Project Handling" Level="1" isTestCase="NO" TestType="Smoke" Comment=""/>
+        <Info UID="84" Name="Project Handling" Level="1" isTestCase="0" TestType="Smoke" Comment=""/>
     </Node>
     <Node>
-        <Info UID="15" Name="Load/Save project" Level="2" isTestCase="YES" TestType="Functional" Comment="Load and save project."/>
+        <Info UID="15" Name="Load/Save project" Level="2" isTestCase="1" TestType="Functional" Comment="Load and save project."/>
         <TestCase>
             <StepIn>open project.</StepIn>
             <StepOut>project can be opened</StepOut>
@@ -40,7 +36,7 @@
         </TestCase>
     </Node>
     <Node>
-        <Info UID="53" Name="Compatibility" Level="1" isTestCase="YES" TestType="Acceptance" Comment="Results from previous version are saved."/>
+        <Info UID="53" Name="Compatibility" Level="1" isTestCase="1" TestType="Acceptance" Comment="Results from previous version are saved."/>
         <TestCase>
             <StepIn>import results saved from a previous version.</StepIn>
             <StepOut>results are shown correctly in the new version.</StepOut>

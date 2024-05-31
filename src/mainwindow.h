@@ -17,11 +17,13 @@ public slots:
     void displayTestCase();
     void closeApp();
     void openProject();
+    void saveProject();
 
 private:
     QAction * m_menu_close;
     QAction * m_menu_openProj;
     QAction * m_menu_closeProj;
+    QAction * m_menu_saveProj;
 
     QWidget * m_mainwindow;
     QTreeView* m_tv_testcase;

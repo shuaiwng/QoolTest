@@ -29,7 +29,7 @@ public:
     ~Project();
 
     void openProject(const char *);
-    // bool updateProject();
+    void saveProject(const char *);
 
     Project_data_t * data();
 

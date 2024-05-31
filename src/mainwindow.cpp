@@ -12,6 +12,7 @@ MainWindow::MainWindow()
 
     m_menu_close = m_mainwindow->findChild<QAction*>("actionClose");
     m_menu_openProj = m_mainwindow->findChild<QAction*>("actionOpen_Project");
+    m_menu_saveProj = m_mainwindow->findChild<QAction*>("actionSave_Project");
 
     m_tv_testcase = m_mainwindow->findChild<QTreeView*>("tv_testcase");
     m_lb_uid = m_mainwindow->findChild<QLabel*>("lb_uid");
@@ -30,6 +31,7 @@ MainWindow::MainWindow()
     connect(m_tv_testcase,SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
     connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
     connect(m_menu_openProj, SIGNAL(triggered()), this, SLOT(openProject()));
+    connect(m_menu_saveProj, SIGNAL(triggered()), this, SLOT(saveProject()));
 
     m_mainwindow->show();
 }
@@ -49,6 +51,14 @@ void MainWindow::openProject()
     this->showTestCaseTree(m_proj->data());
 }
 
+void MainWindow::saveProject()
+{
+    QString fileName = QFileDialog::getSaveFileName(this,
+                                                    tr("Save Project"), ".", tr("Project File (*.qlpj)"));
+    if(m_proj){
+        m_proj->saveProject(fileName.toStdString().c_str());
+    }
+}
 
 void MainWindow::closeApp()
 {

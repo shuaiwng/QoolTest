@@ -1,5 +1,3 @@
-#include <QtCore>
-#include <QtWidgets>
 #include "mainwindow.h"
 
 

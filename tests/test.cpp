@@ -1,28 +1,53 @@
 #include <gtest/gtest.h>
 #include <tinyxml2/tinyxml2.h>
+#include <iostream>
+#include <fstream>
+#include <string>
+#include "project.h"
 
 using namespace tinyxml2;
 
-bool read_project();
+bool compare_txt_files(const char* file1, const char* file2);
 
 
-TEST(ProjectTest, DataHandling) {
-    EXPECT_EQ(read_project(), true);
+TEST(LoadSave, ProjectTest) {
+    std::unique_ptr<Project> testProj (new Project);
+    const char * path_openPj = "../../../tests/testdata/qooltest_project.qlpj";
+    const char * path_savePj = "./test_save_project.qlpj";
+    testProj->openProject(path_openPj);
+    testProj->saveProject(path_savePj);
+
+    EXPECT_EQ(compare_txt_files(path_openPj, path_savePj), true);
 }
 
 
-bool read_project()
+bool compare_txt_files(const char* file1, const char* file2)
 {
-    XMLDocument xml_doc;
+    std::fstream newFile1;
+    std::fstream newFile2;
+    newFile1.open(file1, std::ios::in);
+    newFile2.open(file2, std::ios::in);
 
-    XMLError eResult = xml_doc.LoadFile("../../../tests/testdata/qooltest_project.qlpj");
-    if (eResult != tinyxml2::XML_SUCCESS) return false;
+    std::string line_file1, line_file2;
+    bool isLineFile1, isLineFile2;
+    while(true)
+    {
+        if(std::getline(newFile1, line_file1)) {
+            isLineFile1 = true;
+        } else {
+            isLineFile1 = false;
+        }
+        if(std::getline(newFile2, line_file2)) {
+            isLineFile2 = true;
+        } else {
+            isLineFile2 = false;
+        }
 
-    tinyxml2::XMLNode* root = xml_doc.FirstChild();
-    if (root == nullptr) return false;
-
-    tinyxml2::XMLElement* element = root->FirstChildElement("General");
-    if (element == nullptr) return false;//Fails here
-
+        if(!isLineFile1 && !isLineFile2){
+            break;
+        }
+        if(isLineFile1 != isLineFile2) return false;
+        if(line_file1 != line_file2) return false;
+    }
     return true;
 }
