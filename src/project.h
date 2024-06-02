@@ -21,6 +21,7 @@ struct Project_data_t{
     int max_level;
 };
 
+enum class NodeType {eNodeSubFolder, eNodeTestCase};
 
 class Project
 {
@@ -30,6 +31,15 @@ public:
 
     void openProject(const char *);
     void saveProject(const char *);
+
+    bool followNode(int uid_select, int uid_target, bool b_asChild);
+    void addNode(int uid_target, NodeType eNodeType, bool b_asChild);
+    void deleteNode(int uid);
+
+    std::vector<Node_data_t> getSubNodeList(int idx_node);
+    bool getVecIndex(int uid, int & idx_got);
+    void updateMaxLevel();
+    bool doesUIDExist(int uid);
 
     Project_data_t * data();
 

@@ -17,13 +17,15 @@ public slots:
     void displayTestCase();
     void closeApp();
     void openProject();
-    void saveProject();
+    void saveAsProject();
+    void execTreeConfirm();
+
 
 private:
     QAction * m_menu_close;
     QAction * m_menu_openProj;
     QAction * m_menu_closeProj;
-    QAction * m_menu_saveProj;
+    QAction * m_menu_saveAsProj;
 
     QWidget * m_mainwindow;
     QTreeView* m_tv_testcase;
@@ -31,6 +33,11 @@ private:
     QTextEdit* m_te_comment;
     QComboBox* m_cb_testtype;
     QTableWidget* m_tw_testarea;
+
+    QComboBox* m_cb_tree_method;
+    QLineEdit* m_le_tree_uid;
+    QCheckBox* m_ckb_tree_as_child;
+    QPushButton* m_btn_tree_confirm;
 
     Project * m_proj;
 };

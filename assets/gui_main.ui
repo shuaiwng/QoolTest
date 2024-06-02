@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1200</width>
+    <width>1196</width>
     <height>900</height>
    </rect>
   </property>
@@ -119,7 +119,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <x>10</x>
       <y>20</y>
       <width>261</width>
-      <height>831</height>
+      <height>731</height>
      </rect>
     </property>
    </widget>
@@ -136,13 +136,71 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <number>0</number>
     </property>
    </widget>
+   <widget class="QComboBox" name="cb_tree_method">
+    <property name="geometry">
+     <rect>
+      <x>12</x>
+      <y>770</y>
+      <width>121</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="btn_tree_confirm">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>814</y>
+      <width>81</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Confirm</string>
+    </property>
+   </widget>
+   <widget class="QCheckBox" name="ckb_tree_as_child">
+    <property name="geometry">
+     <rect>
+      <x>20</x>
+      <y>820</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>as Child</string>
+    </property>
+   </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>140</x>
+      <y>770</y>
+      <width>141</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="label_4">
+       <property name="text">
+        <string>-&gt; UID:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="le_tree_uid"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1200</width>
+     <width>1196</width>
      <height>20</height>
     </rect>
    </property>
@@ -151,7 +209,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      <string>File</string>
     </property>
     <addaction name="actionOpen_Project"/>
-    <addaction name="actionSave_Project"/>
+    <addaction name="actionSaveAs_Project"/>
     <addaction name="actionClose"/>
    </widget>
    <widget class="QMenu" name="menuTest">
@@ -176,9 +234,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
     <string>Open Project</string>
    </property>
   </action>
-  <action name="actionSave_Project">
+  <action name="actionSaveAs_Project">
    <property name="text">
-    <string>Save Project</string>
+    <string>Save Project as ..</string>
    </property>
   </action>
   <action name="actionClose_Project">

@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include <QtUiTools>
+#include <QMessageBox>
 
 
 MainWindow::MainWindow()
@@ -12,9 +13,15 @@ MainWindow::MainWindow()
 
     m_menu_close = m_mainwindow->findChild<QAction*>("actionClose");
     m_menu_openProj = m_mainwindow->findChild<QAction*>("actionOpen_Project");
-    m_menu_saveProj = m_mainwindow->findChild<QAction*>("actionSave_Project");
+    m_menu_saveAsProj = m_mainwindow->findChild<QAction*>("actionSaveAs_Project");
 
     m_tv_testcase = m_mainwindow->findChild<QTreeView*>("tv_testcase");
+    m_le_tree_uid = m_mainwindow->findChild<QLineEdit*>("le_tree_uid");
+    m_ckb_tree_as_child = m_mainwindow->findChild<QCheckBox*>("ckb_tree_as_child");
+    m_btn_tree_confirm = m_mainwindow->findChild<QPushButton*>("btn_tree_confirm");
+    m_cb_tree_method = m_mainwindow->findChild<QComboBox*>("cb_tree_method");
+    m_cb_tree_method->addItems({"Follow","Add Subfolder","Add Testcase","Delete"});
+
     m_lb_uid = m_mainwindow->findChild<QLabel*>("lb_uid");
     m_te_comment = m_mainwindow->findChild<QTextEdit*>("te_comment");
     m_cb_testtype = m_mainwindow->findChild<QComboBox*>("cb_testtype");
@@ -28,10 +35,12 @@ MainWindow::MainWindow()
     m_tw_testarea->setHorizontalHeaderItem(0, headerIn);
     m_tw_testarea->setHorizontalHeaderItem(1, headerOut);
 
-    connect(m_tv_testcase,SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
+    connect(m_tv_testcase, SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
     connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
     connect(m_menu_openProj, SIGNAL(triggered()), this, SLOT(openProject()));
-    connect(m_menu_saveProj, SIGNAL(triggered()), this, SLOT(saveProject()));
+    connect(m_menu_saveAsProj, SIGNAL(triggered()), this, SLOT(saveAsProject()));
+    connect(m_btn_tree_confirm, SIGNAL(clicked()), this, SLOT(execTreeConfirm()));
+
 
     m_mainwindow->show();
 }
@@ -39,6 +48,22 @@ MainWindow::MainWindow()
 MainWindow::~MainWindow()
 {
 
+}
+
+void MainWindow::execTreeConfirm()
+{
+    std::string cf_option = m_cb_tree_method->currentText().toStdString();
+    bool b_asChild = m_ckb_tree_as_child->isChecked();
+    if (cf_option == "Follow" && m_tv_testcase->selectionModel()->selectedIndexes().count() == 1)
+    {
+        int uid_selected = m_tv_testcase->currentIndex().data().toString().split(":").at(0).split("-").at(1).toInt();
+        int uid_target = m_le_tree_uid->text().toInt();
+        if(!m_proj->followNode(uid_selected, uid_target, b_asChild)){
+            QMessageBox::information(m_mainwindow, tr("Info"), tr("Follow operation failed: Container/Testcases shall not follow each other "
+                                                                  "within the same branch."));
+        }
+    }
+    showTestCaseTree(m_proj->data());
 }
 
 
@@ -51,10 +76,10 @@ void MainWindow::openProject()
     this->showTestCaseTree(m_proj->data());
 }
 
-void MainWindow::saveProject()
+void MainWindow::saveAsProject()
 {
     QString fileName = QFileDialog::getSaveFileName(this,
-                                                    tr("Save Project"), ".", tr("Project File (*.qlpj)"));
+                                                    tr("Save Project as"), ".", tr("Project File (*.qlpj)"));
     if(m_proj){
         m_proj->saveProject(fileName.toStdString().c_str());
     }
@@ -111,7 +136,6 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
     {
         QStandardItem * testItem = new QStandardItem(elm.full_name.c_str());
         lastItemPerLevel[elm.level] = testItem;
-
         if (elm.level==1){
             rootNode->appendRow(testItem);
         }
@@ -127,6 +151,5 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
     }
 
     m_tv_testcase->setModel(standardModel);
-
     return true;
 }
