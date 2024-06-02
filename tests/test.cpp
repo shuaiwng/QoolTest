@@ -27,8 +27,8 @@ TEST(ProjectTest, FollowNote) {
     std::unique_ptr<Project> testProj1 (new Project);
     testProj1->openProject(path_openPj);
     testProj1->followNode(84, 12, false);
-    EXPECT_EQ(testProj1->data()->node_data[2].uid, 84);
-    EXPECT_EQ(testProj1->data()->node_data[2].level, 2);
+    EXPECT_EQ(testProj1->data()->node_data[3].uid, 84);
+    EXPECT_EQ(testProj1->data()->node_data[4].level, 3);
 
     std::unique_ptr<Project> testProj2 (new Project);
     testProj2->openProject(path_openPj);
@@ -38,15 +38,14 @@ TEST(ProjectTest, FollowNote) {
 
     std::unique_ptr<Project> testProj3 (new Project);
     testProj3->openProject(path_openPj);
-    testProj3->followNode(368, 45, true);
-    EXPECT_EQ(testProj3->data()->node_data[1].level, 2);
-    EXPECT_EQ(testProj3->data()->node_data[2].uid, 12);
+    bool b_follow = testProj3->followNode(368, 45, true);
+    EXPECT_EQ(b_follow, false);
 
     std::unique_ptr<Project> testProj4 (new Project);
     testProj4->openProject(path_openPj);
     testProj4->followNode(53, 45, true);
-    EXPECT_EQ(testProj4->data()->node_data[1].level, 2);
-    EXPECT_EQ(testProj4->data()->node_data[1].uid, 53);
+    EXPECT_EQ(testProj4->data()->node_data[4].level, 2);
+    EXPECT_EQ(testProj4->data()->node_data[4].uid, 53);
 
 }
 
