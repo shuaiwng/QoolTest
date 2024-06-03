@@ -39,10 +39,10 @@
    <widget class="QWidget" name="layoutWidget">
     <property name="geometry">
      <rect>
-      <x>573</x>
-      <y>21</y>
-      <width>571</width>
-      <height>99</height>
+      <x>723</x>
+      <y>19</y>
+      <width>421</width>
+      <height>101</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="verticalLayout">
@@ -88,7 +88,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <x>290</x>
       <y>60</y>
       <width>151</width>
-      <height>31</height>
+      <height>21</height>
      </rect>
     </property>
     <layout class="QHBoxLayout" name="horizontalLayout_2">
@@ -121,6 +121,9 @@ li.checked::marker { content: &quot;\2612&quot;; }
       <width>261</width>
       <height>731</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::EditTrigger::NoEditTriggers</set>
     </property>
    </widget>
    <widget class="QTableWidget" name="tw_testarea">
@@ -194,6 +197,28 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </item>
     </layout>
    </widget>
+   <widget class="QWidget" name="layoutWidget">
+    <property name="geometry">
+     <rect>
+      <x>290</x>
+      <y>94</y>
+      <width>391</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QLabel" name="label_5">
+       <property name="text">
+        <string>Name:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="le_name"/>
+     </item>
+    </layout>
+   </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
    <property name="geometry">
@@ -257,6 +282,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
   <action name="actionInfo">
    <property name="text">
     <string>Info</string>
+   </property>
+  </action>
+  <action name="actionNew_Project">
+   <property name="text">
+    <string>New Project</string>
    </property>
   </action>
  </widget>

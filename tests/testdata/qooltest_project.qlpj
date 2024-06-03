@@ -1,6 +1,6 @@
 <Root>
     <Node>
-        <Info UID="45" Name="GUI Elements" Level="1" isTestCase="0" TestType="Smoke" Comment="Subfolder containing test cases."/>
+        <Info UID="45" Name="Folder: GUI Elements::" Level="1" isTestCase="0" TestType="Smoke" Comment="Subfolder: containing test cases."/>
     </Node>
     <Node>
         <Info UID="12" Name="Liveview" Level="2" isTestCase="0" TestType="Smoke" Comment="LiveView test suite."/>

@@ -23,17 +23,10 @@ MainWindow::MainWindow()
     m_cb_tree_method->addItems({"Follow","Add Subfolder","Add Testcase","Delete"});
 
     m_lb_uid = m_mainwindow->findChild<QLabel*>("lb_uid");
+    m_le_name = m_mainwindow->findChild<QLineEdit*>("le_name");
     m_te_comment = m_mainwindow->findChild<QTextEdit*>("te_comment");
     m_cb_testtype = m_mainwindow->findChild<QComboBox*>("cb_testtype");
     m_tw_testarea = m_mainwindow->findChild<QTableWidget*>("tw_testarea");
-    m_tw_testarea->setColumnCount(2);
-    QTableWidgetItem *headerIn = new QTableWidgetItem();
-    headerIn->setText("Step:");
-    QTableWidgetItem *headerOut = new QTableWidgetItem();
-    headerOut->setText("Test Result:");
-    m_tw_testarea->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    m_tw_testarea->setHorizontalHeaderItem(0, headerIn);
-    m_tw_testarea->setHorizontalHeaderItem(1, headerOut);
 
     connect(m_tv_testcase, SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
     connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
@@ -41,8 +34,13 @@ MainWindow::MainWindow()
     connect(m_menu_saveAsProj, SIGNAL(triggered()), this, SLOT(saveAsProject()));
     connect(m_btn_tree_confirm, SIGNAL(clicked()), this, SLOT(execTreeConfirm()));
 
+    connect(m_cb_tree_method, SIGNAL(currentIndexChanged(int)), this, SLOT(updateConfirmGUI()));
+
+    setupTestarea();
+    initProject();
 
     m_mainwindow->show();
+    showTestCaseTree(m_proj->data());
 }
 
 MainWindow::~MainWindow()
@@ -54,26 +52,71 @@ void MainWindow::execTreeConfirm()
 {
     std::string cf_option = m_cb_tree_method->currentText().toStdString();
     bool b_asChild = m_ckb_tree_as_child->isChecked();
-    if (cf_option == "Follow" && m_tv_testcase->selectionModel()->selectedIndexes().count() == 1)
+    if (cf_option == "Follow" && m_tv_testcase->model()->rowCount())
     {
+        if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+            return;
+        }
         int uid_selected = m_tv_testcase->currentIndex().data().toString().split(":").at(0).split("-").at(1).toInt();
         int uid_target = m_le_tree_uid->text().toInt();
         if(!m_proj->followNode(uid_selected, uid_target, b_asChild)){
-            QMessageBox::information(m_mainwindow, tr("Info"), tr("Follow operation failed: Container/Testcases shall not follow each other "
+            QMessageBox::information(m_mainwindow, tr("Info"), tr("Follow operation failed: Nodes shall not follow each other "
                                                                   "within the same branch."));
+            return;
         }
     }
+    if (cf_option == "Add Subfolder" || cf_option == "Add Testcase")
+    {
+        NodeType nodetype = (cf_option == "Add Testcase") ? NodeType::eNodeTestCase : NodeType::eNodeSubFolder;
+        int uid_target = m_le_tree_uid->text().toInt();
+        if(!m_proj->addNode(uid_target, nodetype, b_asChild)){
+            QMessageBox::information(m_mainwindow, tr("Info"), tr("Failed to add a new Node."));
+            return;
+        }
+    }
+    if (cf_option == "Delete")
+    {
+        if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+            return;
+        }
+        int uid_selected = m_tv_testcase->currentIndex().data().toString().split(":").at(0).split("-").at(1).toInt();
+        if (!isNodeDeletable(uid_selected)){
+            QMessageBox::information(m_mainwindow, tr("Info"), tr("Deletion failed: there must be at least one node."));
+            return;
+        }
+        QString msg = "Do you really want to delete [>> UID-" + QString::number(uid_selected) + " <<] and its subcases?";
+        QMessageBox::StandardButton qReplay = QMessageBox::question(m_mainwindow, "Warning", msg);
+        if (qReplay != QMessageBox::Yes){
+            return;
+        }
+        if(!m_proj->deleteNode(uid_selected)){
+            QMessageBox::information(m_mainwindow, tr("Info"), tr("Deletion failed!"));
+            return;
+        }
+    }
+
     showTestCaseTree(m_proj->data());
 }
 
-
 void MainWindow::openProject()
 {
+    QMessageBox::StandardButton qReplay = QMessageBox::question(m_mainwindow, "Warning",
+                                                                "WARNING: opening a new project will close your current project without saving, are you sure?");
+    if (qReplay != QMessageBox::Yes){
+        return;
+    }
+
     QString fileName = QFileDialog::getOpenFileName(this,
                                             tr("Open Project"), ".", tr("Project File (*.qlpj)"));
+    if (fileName.isEmpty() || fileName.isNull()){
+        return;
+    }
+    delete m_proj;
     m_proj = new Project;
-    m_proj->openProject(fileName.toStdString().c_str());
-    this->showTestCaseTree(m_proj->data());
+    if (!m_proj->openProject(fileName.toStdString().c_str())){
+        return;
+    }
+    showTestCaseTree(m_proj->data());
 }
 
 void MainWindow::saveAsProject()
@@ -94,8 +137,10 @@ void MainWindow::closeApp()
 
 void MainWindow::displayTestCase()
 {
-    QString uid = m_tv_testcase->currentIndex().data().toString().split(":").at(0).split("-").at(1);
+    QString uid = m_tv_testcase->currentIndex().data().toString().split(':').at(0).split("-").at(1);
     m_lb_uid->setText(uid);
+    QString name = m_tv_testcase->currentIndex().data().toString().section(':',1).trimmed();
+    m_le_name->setText(name);
 
     Node_data_t data_selected;
     for (auto & data : m_proj->data()->node_data)
@@ -120,7 +165,6 @@ void MainWindow::displayTestCase()
         m_tw_testarea->setItem(i_row, 0, m_stepIn);
         m_tw_testarea->setItem(i_row, 1, m_stepOut);
     }
-
 }
 
 
@@ -128,13 +172,13 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
 {
     m_tv_testcase->setModel(nullptr);
 
-    QStandardItemModel* standardModel = new QStandardItemModel();
+    QStandardItemModel *standardModel = new QStandardItemModel();
     QStandardItem* rootNode = standardModel->invisibleRootItem();
 
     std::vector<QStandardItem*> lastItemPerLevel(proj_data->max_level+1);
     for(auto & elm : proj_data->node_data)
     {
-        QStandardItem * testItem = new QStandardItem(elm.full_name.c_str());
+        QStandardItem* testItem = new QStandardItem(elm.full_name.c_str());
         lastItemPerLevel[elm.level] = testItem;
         if (elm.level==1){
             rootNode->appendRow(testItem);
@@ -142,14 +186,56 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
         if (elm.level>1){
             lastItemPerLevel[elm.level-1]->appendRow(testItem);
         }
-
         if(elm.isTestCase){
             testItem->setIcon(QIcon("assets/icons/testcase.png"));
         } else {
             testItem->setIcon(QIcon("assets/icons/folder.png"));
         }
     }
-
     m_tv_testcase->setModel(standardModel);
+    m_tv_testcase->model()->setHeaderData(0, Qt::Horizontal, "TreeView");
+
     return true;
 }
+
+void MainWindow::initProject()
+{
+    m_proj = new Project;
+    Node_data_t node_add {99, "Default", "UID-99: Default", 1, true, "", "", {{"", ""}}};
+    m_proj->data()->node_data.push_back(node_add);
+    m_proj->data()->max_level = 1;
+}
+
+bool MainWindow::isNodeDeletable(int uid_select)
+{
+    bool b_match = true;
+    if (!m_proj->compareSubMainEqual(uid_select, b_match)){
+        return false;   // compare operation has failed
+    }
+    if (!b_match){
+        return true;
+    }
+    return false;
+}
+
+void MainWindow::setupTestarea()
+{
+    m_tw_testarea->setColumnCount(2);
+    QTableWidgetItem *headerIn = new QTableWidgetItem();
+    headerIn->setText("Step:");
+    QTableWidgetItem *headerOut = new QTableWidgetItem();
+    headerOut->setText("Test Result:");
+    m_tw_testarea->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    m_tw_testarea->setHorizontalHeaderItem(0, headerIn);
+    m_tw_testarea->setHorizontalHeaderItem(1, headerOut);
+}
+
+void MainWindow::updateConfirmGUI()
+{
+    if (m_cb_tree_method->currentText() == "Delete"){
+        m_le_tree_uid->setEnabled(false);
+    } else {
+        m_le_tree_uid->setEnabled(true);
+    }
+}
+

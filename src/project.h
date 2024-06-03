@@ -29,12 +29,14 @@ public:
     Project();
     ~Project();
 
-    void openProject(const char *);
+    bool openProject(const char *);
     void saveProject(const char *);
 
     bool followNode(int uid_select, int uid_target, bool b_asChild);
-    void addNode(int uid_target, NodeType eNodeType, bool b_asChild);
-    void deleteNode(int uid);
+    bool addNode(int uid_target, NodeType eNodeType, bool b_asChild);
+    bool deleteNode(int uid_target);
+    bool findNextAvailableUID(int & uid_find);
+    bool compareSubMainEqual(int uid_select, bool & b_equal);
 
     std::vector<Node_data_t> getSubNodeList(int idx_node);
     bool getVecIndex(int uid, int & idx_got);

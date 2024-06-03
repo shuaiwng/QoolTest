@@ -4,6 +4,7 @@
 #include <vector>
 #include <memory>
 #include <algorithm>
+#include <limits>
 
 #include <QtCore>
 
@@ -20,10 +21,12 @@ Project::~Project()
 }
 
 
-void Project::openProject(const char * proj_path)
+bool Project::openProject(const char * proj_path)
 {
     XMLDocument xml_doc;
-    xml_doc.LoadFile(proj_path);
+    if (xml_doc.LoadFile(proj_path) != tinyxml2::XML_SUCCESS){
+        return false;
+    }
     XMLElement* dataElm = xml_doc.FirstChildElement("Root");
 
     int max_level = 0;
@@ -49,8 +52,9 @@ void Project::openProject(const char * proj_path)
             for (XMLElement* step = testcase->FirstChildElement("StepIn");
                  step != NULL; step = step->NextSiblingElement("StepIn"))
             {
-                pNodeData.testdata.push_back(std::make_pair(step->GetText(),
-                                                            step->NextSiblingElement()->GetText()));
+                std::string stepText = (step->GetText()!=nullptr) ? step->GetText() : "";   // Bug from tinyxml2, not returning empty string.
+                std::string stepSiblText = (step->NextSiblingElement()->GetText()!=nullptr) ? step->NextSiblingElement()->GetText() : "";
+                pNodeData.testdata.push_back(std::make_pair(stepText, stepSiblText));
             }
         }
         m_project_data.node_data.push_back(pNodeData);
@@ -61,6 +65,8 @@ void Project::openProject(const char * proj_path)
         }
     }
     m_project_data.max_level = max_level;
+
+    return true;
 }
 
 
@@ -208,6 +214,49 @@ bool Project::followNode(int uid_select, int uid_target, bool b_asChild)
     return true;
 }
 
+bool Project::addNode(int uid_target, NodeType eNodeType, bool b_asChild)
+{
+    if (!doesUIDExist(uid_target)){
+        return false;
+    }
+    int new_uid;
+    if (!findNextAvailableUID(new_uid)){
+        return false;
+    }
+    int idx_target_orig;
+    if(!getVecIndex(uid_target, idx_target_orig)){
+        return false;
+    }
+    std::vector<Node_data_t> node_tag_list = getSubNodeList(idx_target_orig);
+
+    bool is_testcase = (eNodeType == NodeType::eNodeTestCase) ? true : false;
+    std::string name_default = std::string("UID-")+std::to_string(new_uid)+": ";
+    Node_data_t node_add {new_uid, name_default, name_default, node_tag_list[0].level, is_testcase, "", "", {{"", ""}}};
+    if (b_asChild){
+        node_add.level += 1;
+    }
+    m_project_data.node_data.insert(m_project_data.node_data.begin()+idx_target_orig+node_tag_list.size(), node_add);
+    updateMaxLevel();
+
+    return true;
+}
+
+bool Project::deleteNode(int uid_selected)
+{
+    if (!doesUIDExist(uid_selected)){
+        return false;
+    }
+    int idx_selected_orig;
+    if(!getVecIndex(uid_selected, idx_selected_orig)){
+        return false;
+    }
+    std::vector<Node_data_t> node_del_list = getSubNodeList(idx_selected_orig);
+
+
+    m_project_data.node_data.erase(m_project_data.node_data.begin()+idx_selected_orig,
+                                   m_project_data.node_data.begin()+idx_selected_orig+node_del_list.size());
+    return true;
+}
 
 bool Project::getVecIndex(int uid, int & idx_got)
 {
@@ -245,6 +294,44 @@ void Project::updateMaxLevel()
         vec_maxLevel.push_back(it.level);
     }
     m_project_data.max_level = *std::max_element(vec_maxLevel.begin(), vec_maxLevel.end());
+}
+
+bool Project::findNextAvailableUID(int & uid_find)
+{
+    std::vector<int> vec_uid;
+    for (auto & it : m_project_data.node_data)
+    {
+        vec_uid.push_back(it.uid);
+    }
+    for (int uid_search = 0; uid_search < std::numeric_limits<int>::max(); uid_search++){
+        if(!std::count(vec_uid.begin(), vec_uid.end(), uid_search)){
+            uid_find = uid_search;
+            return true;
+        } else {
+            continue;
+        }
+    }
+    return false;
+}
+
+bool Project::compareSubMainEqual(int uid_select, bool & b_equal)
+{
+    if (!doesUIDExist(uid_select)){
+        return false;
+    }
+    int idx_select_orig;
+    if(!getVecIndex(uid_select, idx_select_orig)){
+        return false;
+    }
+    std::vector<Node_data_t> node_sub_list = getSubNodeList(idx_select_orig);
+    if (m_project_data.node_data.size() != node_sub_list.size()){
+        b_equal = false;
+        return true;
+    } else {
+        b_equal = true;
+        return true;
+    }
+    return false;
 }
 
 

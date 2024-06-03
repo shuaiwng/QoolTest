@@ -12,6 +12,9 @@ public:
     ~MainWindow();
 
     bool showTestCaseTree(Project_data_t * proj_data);
+    void initProject();
+    void setupTestarea();
+    bool isNodeDeletable(int uid_select);
 
 public slots:
     void displayTestCase();
@@ -19,6 +22,7 @@ public slots:
     void openProject();
     void saveAsProject();
     void execTreeConfirm();
+    void updateConfirmGUI();
 
 
 private:
@@ -30,6 +34,7 @@ private:
     QWidget * m_mainwindow;
     QTreeView* m_tv_testcase;
     QLabel* m_lb_uid;
+    QLineEdit* m_le_name;
     QTextEdit* m_te_comment;
     QComboBox* m_cb_testtype;
     QTableWidget* m_tw_testarea;
