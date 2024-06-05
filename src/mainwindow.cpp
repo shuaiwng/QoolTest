@@ -11,6 +11,9 @@ MainWindow::MainWindow()
     m_mainwindow = loader.load(&file, this);
     file.close();
 
+    m_mainwindow->setWindowIcon(QIcon("assets/icons/app.png"));
+    m_mainwindow->installEventFilter(this);
+
     m_menu_close = m_mainwindow->findChild<QAction*>("actionClose");
     m_menu_openProj = m_mainwindow->findChild<QAction*>("actionOpen_Project");
     m_menu_saveAsProj = m_mainwindow->findChild<QAction*>("actionSaveAs_Project");
@@ -27,6 +30,11 @@ MainWindow::MainWindow()
     m_te_comment = m_mainwindow->findChild<QTextEdit*>("te_comment");
     m_cb_testtype = m_mainwindow->findChild<QComboBox*>("cb_testtype");
     m_tw_testarea = m_mainwindow->findChild<QTableWidget*>("tw_testarea");
+    m_btn_up = m_mainwindow->findChild<QPushButton*>("btn_up");
+    m_btn_down = m_mainwindow->findChild<QPushButton*>("btn_down");
+    m_btn_plus = m_mainwindow->findChild<QPushButton*>("btn_plus");
+    m_btn_minus = m_mainwindow->findChild<QPushButton*>("btn_minus");
+    m_btn_savecase = m_mainwindow->findChild<QPushButton*>("btn_savecase");
 
     connect(m_tv_testcase, SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
     connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
@@ -36,7 +44,11 @@ MainWindow::MainWindow()
 
     connect(m_cb_tree_method, SIGNAL(currentIndexChanged(int)), this, SLOT(updateConfirmGUI()));
 
-    setupTestarea();
+    connect(m_btn_plus, SIGNAL(clicked()), this, SLOT(addTestCaseStep()));
+    connect(m_btn_minus, SIGNAL(clicked()), this, SLOT(deleteTestCaseStep()));
+    connect(m_btn_savecase, SIGNAL(clicked()), this, SLOT(updateTestCase()));
+
+    clearTestarea();
     initProject();
 
     m_mainwindow->show();
@@ -47,6 +59,16 @@ MainWindow::~MainWindow()
 {
 
 }
+
+bool MainWindow::eventFilter(QObject *object, QEvent *event)
+{
+    if (object == this->m_mainwindow && event->type() == QEvent::Close)
+    {
+        qApp->quit();
+    }
+    return false;
+}
+
 
 void MainWindow::execTreeConfirm()
 {
@@ -94,7 +116,6 @@ void MainWindow::execTreeConfirm()
             return;
         }
     }
-
     showTestCaseTree(m_proj->data());
 }
 
@@ -116,6 +137,7 @@ void MainWindow::openProject()
     if (!m_proj->openProject(fileName.toStdString().c_str())){
         return;
     }
+    clearTestarea();
     showTestCaseTree(m_proj->data());
 }
 
@@ -149,8 +171,12 @@ void MainWindow::displayTestCase()
             data_selected = data;
         }
     }
-    m_cb_testtype->clear();
-    m_cb_testtype->addItem(QString::fromStdString(data_selected.testType));
+    if (!data_selected.testType.empty() &&
+        m_cb_testtype->findText(QString::fromStdString(data_selected.testType))<0)
+    {
+        m_cb_testtype->addItem(QString::fromStdString(data_selected.testType));
+    }
+    m_cb_testtype->setCurrentText(QString::fromStdString(data_selected.testType));
     m_te_comment->setText(QString::fromStdString(data_selected.comment));
 
     m_tw_testarea->setRowCount(0);
@@ -172,8 +198,8 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
 {
     m_tv_testcase->setModel(nullptr);
 
-    QStandardItemModel *standardModel = new QStandardItemModel();
-    QStandardItem* rootNode = standardModel->invisibleRootItem();
+    QStandardItemModel* m_standardModel = new QStandardItemModel();
+    QStandardItem* rootNode = m_standardModel->invisibleRootItem();
 
     std::vector<QStandardItem*> lastItemPerLevel(proj_data->max_level+1);
     for(auto & elm : proj_data->node_data)
@@ -192,10 +218,67 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
             testItem->setIcon(QIcon("assets/icons/folder.png"));
         }
     }
-    m_tv_testcase->setModel(standardModel);
+    m_tv_testcase->setModel(m_standardModel);
     m_tv_testcase->model()->setHeaderData(0, Qt::Horizontal, "TreeView");
 
     return true;
+}
+
+void MainWindow::addTestCaseStep()
+{
+    if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+        return;
+    }
+    QString uid = m_tv_testcase->currentIndex().data().toString().split(':').at(0).split("-").at(1);
+    if (!m_proj->addCaseStep(uid.toInt())){
+        return;
+    }
+    m_tw_testarea->insertRow(m_tw_testarea->rowCount());
+}
+
+void MainWindow::deleteTestCaseStep()
+{
+    if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+        return;
+    }
+    if (m_tw_testarea->selectionModel()->selectedIndexes().count() != 1){
+        return;
+    }
+    QString uid = m_tv_testcase->currentIndex().data().toString().split(':').at(0).split("-").at(1);
+    if (!m_proj->deleteCaseStep(uid.toInt(), m_tw_testarea->currentRow()))
+    {
+        return;
+    }
+    m_tw_testarea->removeRow(m_tw_testarea->currentRow());
+}
+
+void MainWindow::updateTestCase()
+{
+    if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+        return;
+    }
+    int uid_selected = m_tv_testcase->currentIndex().data().toString().split(":").at(0).split("-").at(1).toInt();
+    int idx_got;
+    m_proj->getVecIndex(uid_selected, idx_got);
+
+    Node_data_t mod_data;
+    mod_data.uid = m_lb_uid->text().toInt();
+    mod_data.name = m_le_name->text().toStdString();
+    mod_data.full_name = "UID-"+m_lb_uid->text().toStdString()+": "+mod_data.name;
+    mod_data.testType = m_cb_testtype->currentText().toStdString();
+    mod_data.isTestCase = m_proj->data()->node_data[idx_got].isTestCase;
+    mod_data.comment = m_te_comment->toPlainText().toStdString();
+    mod_data.level = m_proj->data()->node_data[idx_got].level;
+
+    for (int i_step=0; i_step < m_tw_testarea->rowCount(); i_step++){
+        // Qt6 has Segfault-Bug, if some cells remain empty aka. tablewidget.item.text() causes crash.
+        std::string stepIn=(m_tw_testarea->item(i_step,0)==nullptr)?"":m_tw_testarea->item(i_step,0)->text().toStdString();
+        std::string stepOut=(m_tw_testarea->item(i_step,1)==nullptr)?"":m_tw_testarea->item(i_step,1)->text().toStdString();
+        mod_data.testdata.push_back(std::make_tuple(stepIn, stepOut));
+    }
+    m_proj->data()->node_data[idx_got] = mod_data;
+
+    showTestCaseTree(m_proj->data());
 }
 
 void MainWindow::initProject()
@@ -218,8 +301,18 @@ bool MainWindow::isNodeDeletable(int uid_select)
     return false;
 }
 
-void MainWindow::setupTestarea()
+void MainWindow::clearTestarea()
 {
+    m_cb_testtype->clear();
+    m_cb_testtype->addItems({"Acceptance Test", "Destructive Test", "Functional Test", "Performance Test",
+                            "Regression Test", "Smoke Test", "Unit Test"});
+
+    m_lb_uid->clear();
+    m_le_name->clear();
+    m_te_comment->clear();
+    m_tw_testarea->clear();
+    m_tw_testarea->setRowCount(0);
+
     m_tw_testarea->setColumnCount(2);
     QTableWidgetItem *headerIn = new QTableWidgetItem();
     headerIn->setText("Step:");
@@ -228,6 +321,10 @@ void MainWindow::setupTestarea()
     m_tw_testarea->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     m_tw_testarea->setHorizontalHeaderItem(0, headerIn);
     m_tw_testarea->setHorizontalHeaderItem(1, headerOut);
+    m_btn_up->setIcon(QIcon("assets/icons/up.png"));
+    m_btn_down->setIcon(QIcon("assets/icons/down.png"));
+    m_btn_plus->setIcon(QIcon("assets/icons/plus.png"));
+    m_btn_minus->setIcon(QIcon("assets/icons/minus.png"));
 }
 
 void MainWindow::updateConfirmGUI()
@@ -238,4 +335,3 @@ void MainWindow::updateConfirmGUI()
         m_le_tree_uid->setEnabled(true);
     }
 }
-

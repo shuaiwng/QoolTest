@@ -113,6 +113,20 @@ void Project::saveProject(const char *proj_path)
     xmlDoc.SaveFile(proj_path);
 }
 
+bool Project::saveTestCase(int uid_select, Node_data_t mod_data)
+{
+    if (!doesUIDExist(uid_select)){
+        return false;
+    }
+    int idx_select;
+    if(!getVecIndex(uid_select, idx_select)){
+        return false;
+    }
+    m_project_data.node_data[idx_select] = mod_data;
+
+    return true;
+}
+
 std::vector<Node_data_t> Project::getSubNodeList(int idx_node)
 {
     // determine note list, which includes child elements, if any
@@ -230,8 +244,7 @@ bool Project::addNode(int uid_target, NodeType eNodeType, bool b_asChild)
     std::vector<Node_data_t> node_tag_list = getSubNodeList(idx_target_orig);
 
     bool is_testcase = (eNodeType == NodeType::eNodeTestCase) ? true : false;
-    std::string name_default = std::string("UID-")+std::to_string(new_uid)+": ";
-    Node_data_t node_add {new_uid, name_default, name_default, node_tag_list[0].level, is_testcase, "", "", {{"", ""}}};
+    Node_data_t node_add {new_uid, "", std::string("UID-")+std::to_string(new_uid)+": ", node_tag_list[0].level, is_testcase, "", "", {{"", ""}}};
     if (b_asChild){
         node_add.level += 1;
     }
@@ -255,6 +268,38 @@ bool Project::deleteNode(int uid_selected)
 
     m_project_data.node_data.erase(m_project_data.node_data.begin()+idx_selected_orig,
                                    m_project_data.node_data.begin()+idx_selected_orig+node_del_list.size());
+    return true;
+}
+
+bool Project::addCaseStep(int uid_select)
+{
+    if (!doesUIDExist(uid_select)){
+        return false;
+    }
+    int idx_select;
+    if(!getVecIndex(uid_select, idx_select)){
+        return false;
+    }
+    m_project_data.node_data[idx_select].testdata.push_back(std::make_tuple("",""));
+
+    return true;
+}
+
+bool Project::deleteCaseStep(int uid_select, int idx_step)
+{
+    if (!doesUIDExist(uid_select)){
+        return false;
+    }
+    int idx_select;
+    if(!getVecIndex(uid_select, idx_select)){
+        return false;
+    }
+    if (m_project_data.node_data[idx_select].testdata.size() < 2){   // leave at least one test step
+        return false;
+    }
+    m_project_data.node_data[idx_select].testdata.erase(
+        m_project_data.node_data[idx_select].testdata.begin()+idx_step);
+
     return true;
 }
 

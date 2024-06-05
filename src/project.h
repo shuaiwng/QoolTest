@@ -31,12 +31,16 @@ public:
 
     bool openProject(const char *);
     void saveProject(const char *);
+    bool saveTestCase(int uid_select, Node_data_t mod_data);
 
     bool followNode(int uid_select, int uid_target, bool b_asChild);
     bool addNode(int uid_target, NodeType eNodeType, bool b_asChild);
     bool deleteNode(int uid_target);
     bool findNextAvailableUID(int & uid_find);
     bool compareSubMainEqual(int uid_select, bool & b_equal);
+
+    bool addCaseStep(int uid_select);
+    bool deleteCaseStep(int uid_select, int idx_step);
 
     std::vector<Node_data_t> getSubNodeList(int idx_node);
     bool getVecIndex(int uid, int & idx_got);

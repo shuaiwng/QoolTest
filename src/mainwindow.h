@@ -13,7 +13,7 @@ public:
 
     bool showTestCaseTree(Project_data_t * proj_data);
     void initProject();
-    void setupTestarea();
+    void clearTestarea();
     bool isNodeDeletable(int uid_select);
 
 public slots:
@@ -24,8 +24,14 @@ public slots:
     void execTreeConfirm();
     void updateConfirmGUI();
 
+    void addTestCaseStep();
+    void deleteTestCaseStep();
+
+    void updateTestCase();
 
 private:
+    bool eventFilter(QObject *object, QEvent *event);
+
     QAction * m_menu_close;
     QAction * m_menu_openProj;
     QAction * m_menu_closeProj;
@@ -38,11 +44,17 @@ private:
     QTextEdit* m_te_comment;
     QComboBox* m_cb_testtype;
     QTableWidget* m_tw_testarea;
+    QPushButton* m_btn_up;
+    QPushButton* m_btn_down;
+    QPushButton* m_btn_plus;
+    QPushButton* m_btn_minus;
+    QPushButton* m_btn_savecase;
 
     QComboBox* m_cb_tree_method;
     QLineEdit* m_le_tree_uid;
     QCheckBox* m_ckb_tree_as_child;
     QPushButton* m_btn_tree_confirm;
+
 
     Project * m_proj;
 };
