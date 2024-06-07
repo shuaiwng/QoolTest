@@ -21,11 +21,14 @@ public slots:
     void closeApp();
     void openProject();
     void saveAsProject();
+    void showAbout();
     void execTreeConfirm();
     void updateConfirmGUI();
 
     void addTestCaseStep();
     void deleteTestCaseStep();
+    void moveTestStepUp();
+    void moveTestStepDown();
 
     void updateTestCase();
 
@@ -36,6 +39,7 @@ private:
     QAction * m_menu_openProj;
     QAction * m_menu_closeProj;
     QAction * m_menu_saveAsProj;
+    QAction * m_menu_about;
 
     QWidget * m_mainwindow;
     QTreeView* m_tv_testcase;

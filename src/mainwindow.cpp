@@ -17,6 +17,7 @@ MainWindow::MainWindow()
     m_menu_close = m_mainwindow->findChild<QAction*>("actionClose");
     m_menu_openProj = m_mainwindow->findChild<QAction*>("actionOpen_Project");
     m_menu_saveAsProj = m_mainwindow->findChild<QAction*>("actionSaveAs_Project");
+    m_menu_about = m_mainwindow->findChild<QAction*>("actionAbout");
 
     m_tv_testcase = m_mainwindow->findChild<QTreeView*>("tv_testcase");
     m_le_tree_uid = m_mainwindow->findChild<QLineEdit*>("le_tree_uid");
@@ -34,18 +35,24 @@ MainWindow::MainWindow()
     m_btn_down = m_mainwindow->findChild<QPushButton*>("btn_down");
     m_btn_plus = m_mainwindow->findChild<QPushButton*>("btn_plus");
     m_btn_minus = m_mainwindow->findChild<QPushButton*>("btn_minus");
+    m_btn_up = m_mainwindow->findChild<QPushButton*>("btn_up");
+    m_btn_down = m_mainwindow->findChild<QPushButton*>("btn_down");
     m_btn_savecase = m_mainwindow->findChild<QPushButton*>("btn_savecase");
 
     connect(m_tv_testcase, SIGNAL(clicked(QModelIndex)), this, SLOT(displayTestCase()));
     connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
     connect(m_menu_openProj, SIGNAL(triggered()), this, SLOT(openProject()));
     connect(m_menu_saveAsProj, SIGNAL(triggered()), this, SLOT(saveAsProject()));
+    connect(m_menu_about, SIGNAL(triggered()), this, SLOT(showAbout()));
     connect(m_btn_tree_confirm, SIGNAL(clicked()), this, SLOT(execTreeConfirm()));
 
     connect(m_cb_tree_method, SIGNAL(currentIndexChanged(int)), this, SLOT(updateConfirmGUI()));
 
     connect(m_btn_plus, SIGNAL(clicked()), this, SLOT(addTestCaseStep()));
     connect(m_btn_minus, SIGNAL(clicked()), this, SLOT(deleteTestCaseStep()));
+    connect(m_btn_up, SIGNAL(clicked()), this, SLOT(moveTestStepUp()));
+    connect(m_btn_down, SIGNAL(clicked()), this, SLOT(moveTestStepDown()));
+
     connect(m_btn_savecase, SIGNAL(clicked()), this, SLOT(updateTestCase()));
 
     clearTestarea();
@@ -156,6 +163,10 @@ void MainWindow::closeApp()
     qApp->quit();
 }
 
+void MainWindow::showAbout()
+{
+    QMessageBox::aboutQt(m_mainwindow, "About");
+}
 
 void MainWindow::displayTestCase()
 {
@@ -250,6 +261,48 @@ void MainWindow::deleteTestCaseStep()
         return;
     }
     m_tw_testarea->removeRow(m_tw_testarea->currentRow());
+}
+
+void MainWindow::moveTestStepUp()
+{
+    if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+        return;
+    }
+    if (m_tw_testarea->selectionModel()->selectedIndexes().count() != 1){
+        return;
+    }
+    QString uid = m_tv_testcase->currentIndex().data().toString().split(':').at(0).split("-").at(1);
+    if (!m_proj->moveUpCaseStep(uid.toInt(), m_tw_testarea->currentRow())){
+        return;
+    }
+    int current_row = m_tw_testarea->currentRow();
+    for (int i_col=0; i_col<2; i_col++){
+        QTableWidgetItem *item = m_tw_testarea->takeItem(current_row,i_col);
+        QTableWidgetItem *itemAbove = m_tw_testarea->takeItem(current_row-1,i_col);
+        m_tw_testarea->setItem(current_row,i_col,itemAbove);
+        m_tw_testarea->setItem(current_row-1,i_col,item);
+    }
+}
+
+void MainWindow::moveTestStepDown()
+{
+    if (!m_tv_testcase->selectionModel()->selectedIndexes().count()){
+        return;
+    }
+    if (m_tw_testarea->selectionModel()->selectedIndexes().count() != 1){
+        return;
+    }
+    QString uid = m_tv_testcase->currentIndex().data().toString().split(':').at(0).split("-").at(1);
+    if(!m_proj->moveDownCaseStep(uid.toInt(), m_tw_testarea->rowCount(), m_tw_testarea->currentRow())){
+        return;
+    }
+    int current_row = m_tw_testarea->currentRow();
+    for (int i_col=0; i_col<2; i_col++){
+        QTableWidgetItem *item = m_tw_testarea->takeItem(current_row,i_col);
+        QTableWidgetItem *itemAbove = m_tw_testarea->takeItem(current_row+1,i_col);
+        m_tw_testarea->setItem(current_row,i_col,itemAbove);
+        m_tw_testarea->setItem(current_row+1,i_col,item);
+    }
 }
 
 void MainWindow::updateTestCase()

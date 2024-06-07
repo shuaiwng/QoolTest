@@ -41,6 +41,8 @@ public:
 
     bool addCaseStep(int uid_select);
     bool deleteCaseStep(int uid_select, int idx_step);
+    bool moveUpCaseStep(int uid_select, int idx_step);
+    bool moveDownCaseStep(int uid_select, int current_row_count, int idx_step);
 
     std::vector<Node_data_t> getSubNodeList(int idx_node);
     bool getVecIndex(int uid, int & idx_got);

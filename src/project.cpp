@@ -303,6 +303,38 @@ bool Project::deleteCaseStep(int uid_select, int idx_step)
     return true;
 }
 
+bool Project::moveUpCaseStep(int uid_select, int idx_step)
+{
+    if (idx_step < 1){
+        return false;
+    }
+    if (!doesUIDExist(uid_select)){
+        return false;
+    }
+    int idx_select;
+    if(!getVecIndex(uid_select, idx_select)){
+        return false;
+    }
+    std::swap(m_project_data.node_data[idx_select].testdata[idx_step-1], m_project_data.node_data[idx_select].testdata[idx_step]);
+    return true;
+}
+
+bool Project::moveDownCaseStep(int uid_select, int current_row_count, int idx_step)
+{
+    if (idx_step == current_row_count-1){
+        return false;
+    }
+    if (!doesUIDExist(uid_select)){
+        return false;
+    }
+    int idx_select;
+    if(!getVecIndex(uid_select, idx_select)){
+        return false;
+    }
+    std::swap(m_project_data.node_data[idx_select].testdata[idx_step], m_project_data.node_data[idx_select].testdata[idx_step+1]);
+    return true;
+}
+
 bool Project::getVecIndex(int uid, int & idx_got)
 {
     int idx = 0;
