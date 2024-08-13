@@ -21,6 +21,7 @@ public slots:
     void closeApp();
     void openProject();
     void saveAsProject();
+    void clearResults();
     void showAbout();
     void execTreeConfirm();
     void updateConfirmGUI();
@@ -31,6 +32,7 @@ public slots:
     void moveTestStepDown();
 
     void updateTestCase();
+    void updateResultGUI();
 
 private:
     bool eventFilter(QObject *object, QEvent *event);
@@ -39,6 +41,7 @@ private:
     QAction * m_menu_openProj;
     QAction * m_menu_closeProj;
     QAction * m_menu_saveAsProj;
+    QAction * m_menu_clearResults;
     QAction * m_menu_about;
 
     QWidget * m_mainwindow;
@@ -55,6 +58,7 @@ private:
     QPushButton* m_btn_savecase;
 
     QComboBox* m_cb_tree_method;
+    QComboBox* m_cb_result;
     QLineEdit* m_le_tree_uid;
     QCheckBox* m_ckb_tree_as_child;
     QPushButton* m_btn_tree_confirm;

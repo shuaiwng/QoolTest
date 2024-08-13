@@ -12,6 +12,7 @@ struct Node_data_t{
     int level;
     bool isTestCase;
     std::string testType;
+    std::string testResult;
     std::string comment;
     std::vector<std::tuple<std::string, std::string>> testdata;
 };

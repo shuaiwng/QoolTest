@@ -43,6 +43,7 @@ bool Project::openProject(const char * proj_path)
             pNodeData.isTestCase = false;
         }
         pNodeData.testType = infoElm->Attribute("TestType");
+        pNodeData.testResult = infoElm->Attribute("TestResult");
         pNodeData.comment = infoElm->Attribute("Comment");
         pNodeData.uid = std::stoi(std::string(infoElm->Attribute("UID")));
         pNodeData.full_name = "UID-" + std::to_string(pNodeData.uid) + ": " + pNodeData.name;
@@ -86,6 +87,7 @@ void Project::saveProject(const char *proj_path)
         pInfoElement->SetAttribute("Level", std::to_string(m_project_data.node_data[i].level).c_str());
         pInfoElement->SetAttribute("isTestCase", std::to_string(int(m_project_data.node_data[i].isTestCase)).c_str());
         pInfoElement->SetAttribute("TestType", m_project_data.node_data[i].testType.c_str());
+        pInfoElement->SetAttribute("TestResult", m_project_data.node_data[i].testResult.c_str());
         pInfoElement->SetAttribute("Comment", m_project_data.node_data[i].comment.c_str());
 
         pNodeElement->InsertEndChild(pInfoElement);
@@ -244,7 +246,7 @@ bool Project::addNode(int uid_target, NodeType eNodeType, bool b_asChild)
     std::vector<Node_data_t> node_tag_list = getSubNodeList(idx_target_orig);
 
     bool is_testcase = (eNodeType == NodeType::eNodeTestCase) ? true : false;
-    Node_data_t node_add {new_uid, "", std::string("UID-")+std::to_string(new_uid)+": ", node_tag_list[0].level, is_testcase, "", "", {{"", ""}}};
+    Node_data_t node_add {new_uid, "", std::string("UID-")+std::to_string(new_uid)+": ", node_tag_list[0].level, is_testcase, "", "Neutral", "", {{"", ""}}};
     if (b_asChild){
         node_add.level += 1;
     }

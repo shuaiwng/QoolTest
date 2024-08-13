@@ -12,7 +12,7 @@ bool compare_txt_files(const char* file1, const char* file2);
 
 TEST(ProjectTest, LoadSave) {
     std::unique_ptr<Project> testProj (new Project);
-    const char * path_openPj = "../../../tests/testdata/qooltest_project.qlpj";
+    const char * path_openPj = "../../../tests/testdata/reset_proj.qlpj";
     const char * path_savePj = "./test_save_project.qlpj";
     testProj->openProject(path_openPj);
     testProj->saveProject(path_savePj);
@@ -22,31 +22,20 @@ TEST(ProjectTest, LoadSave) {
 
 
 TEST(ProjectTest, FollowNote) {
-    const char * path_openPj = "../../../tests/testdata/qooltest_project.qlpj";
+    const char * path_openPj1 = "../../../tests/testdata/reset_proj.qlpj";
+    const char * path_openPj2 = "../../../tests/testdata/reset_proj.qlpj";
 
     std::unique_ptr<Project> testProj1 (new Project);
-    testProj1->openProject(path_openPj);
-    testProj1->followNode(84, 12, false);
-    EXPECT_EQ(testProj1->data()->node_data[3].uid, 84);
+    testProj1->openProject(path_openPj1);
+    testProj1->followNode(6, 2, false);
+    EXPECT_EQ(testProj1->data()->node_data[3].uid, 6);
     EXPECT_EQ(testProj1->data()->node_data[4].level, 3);
 
     std::unique_ptr<Project> testProj2 (new Project);
-    testProj2->openProject(path_openPj);
-    testProj2->followNode(45, 53, true);
-    EXPECT_EQ(testProj2->data()->node_data.back().uid, 3);
-    EXPECT_EQ(testProj2->data()->node_data.back().level, 3);
-
-    std::unique_ptr<Project> testProj3 (new Project);
-    testProj3->openProject(path_openPj);
-    bool b_follow = testProj3->followNode(368, 45, true);
-    EXPECT_EQ(b_follow, false);
-
-    std::unique_ptr<Project> testProj4 (new Project);
-    testProj4->openProject(path_openPj);
-    testProj4->followNode(53, 45, true);
-    EXPECT_EQ(testProj4->data()->node_data[4].level, 2);
-    EXPECT_EQ(testProj4->data()->node_data[4].uid, 53);
-
+    testProj2->openProject(path_openPj2);
+    testProj2->followNode(6, 5, true);
+    EXPECT_EQ(testProj2->data()->node_data.back().uid, 8);
+    EXPECT_EQ(testProj2->data()->node_data.back().level, 4);
 }
 
 

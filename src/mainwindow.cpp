@@ -17,10 +17,12 @@ MainWindow::MainWindow()
     m_menu_close = m_mainwindow->findChild<QAction*>("actionClose");
     m_menu_openProj = m_mainwindow->findChild<QAction*>("actionOpen_Project");
     m_menu_saveAsProj = m_mainwindow->findChild<QAction*>("actionSaveAs_Project");
+    m_menu_clearResults = m_mainwindow->findChild<QAction*>("actionClear_Results");
     m_menu_about = m_mainwindow->findChild<QAction*>("actionAbout");
 
     m_tv_testcase = m_mainwindow->findChild<QTreeView*>("tv_testcase");
     m_le_tree_uid = m_mainwindow->findChild<QLineEdit*>("le_tree_uid");
+    m_cb_result = m_mainwindow->findChild<QComboBox*>("cb_result");
     m_ckb_tree_as_child = m_mainwindow->findChild<QCheckBox*>("ckb_tree_as_child");
     m_btn_tree_confirm = m_mainwindow->findChild<QPushButton*>("btn_tree_confirm");
     m_cb_tree_method = m_mainwindow->findChild<QComboBox*>("cb_tree_method");
@@ -43,6 +45,7 @@ MainWindow::MainWindow()
     connect(m_menu_close, SIGNAL(triggered()), this, SLOT(closeApp()));
     connect(m_menu_openProj, SIGNAL(triggered()), this, SLOT(openProject()));
     connect(m_menu_saveAsProj, SIGNAL(triggered()), this, SLOT(saveAsProject()));
+    connect(m_menu_clearResults, SIGNAL(triggered()), this, SLOT(clearResults()));
     connect(m_menu_about, SIGNAL(triggered()), this, SLOT(showAbout()));
     connect(m_btn_tree_confirm, SIGNAL(clicked()), this, SLOT(execTreeConfirm()));
 
@@ -54,6 +57,7 @@ MainWindow::MainWindow()
     connect(m_btn_down, SIGNAL(clicked()), this, SLOT(moveTestStepDown()));
 
     connect(m_btn_savecase, SIGNAL(clicked()), this, SLOT(updateTestCase()));
+    connect(m_cb_result, SIGNAL(currentIndexChanged(int)), this, SLOT(updateResultGUI()));
 
     clearTestarea();
     initProject();
@@ -128,9 +132,9 @@ void MainWindow::execTreeConfirm()
 
 void MainWindow::openProject()
 {
-    QMessageBox::StandardButton qReplay = QMessageBox::question(m_mainwindow, "Warning",
+    QMessageBox::StandardButton qReply = QMessageBox::question(m_mainwindow, "Warning",
                                                                 "WARNING: opening a new project will close your current project without saving, are you sure?");
-    if (qReplay != QMessageBox::Yes){
+    if (qReply != QMessageBox::Yes){
         return;
     }
 
@@ -155,6 +159,22 @@ void MainWindow::saveAsProject()
     if(m_proj){
         m_proj->saveProject(fileName.toStdString().c_str());
     }
+}
+
+void MainWindow::clearResults()
+{
+    QMessageBox::StandardButton qReply = QMessageBox::question(m_mainwindow, "Warning",
+                                                                "WARNING: All test results of the current project will be cleaned up, are you sure?");
+    if (qReply != QMessageBox::Yes){
+        return;
+    }
+
+    for (auto & data : m_proj->data()->node_data)
+    {
+        data.testResult = "Neutral";
+    }
+    clearTestarea();
+    showTestCaseTree(m_proj->data());
 }
 
 void MainWindow::closeApp()
@@ -188,6 +208,7 @@ void MainWindow::displayTestCase()
         m_cb_testtype->addItem(QString::fromStdString(data_selected.testType));
     }
     m_cb_testtype->setCurrentText(QString::fromStdString(data_selected.testType));
+    m_cb_result->setCurrentText(QString::fromStdString(data_selected.testResult));
     m_te_comment->setText(QString::fromStdString(data_selected.comment));
 
     m_tw_testarea->setRowCount(0);
@@ -228,9 +249,23 @@ bool MainWindow::showTestCaseTree(Project_data_t * proj_data)
         } else {
             testItem->setIcon(QIcon("assets/icons/folder.png"));
         }
+
+        if (elm.testResult == "Neutral") {
+            QBrush tv_brush(QColor(192,192,192), Qt::SolidPattern);
+            testItem->setBackground(tv_brush);
+        }
+        else if (elm.testResult == "Pass") {
+            QBrush tv_brush(QColor(0,255,128), Qt::SolidPattern);
+            testItem->setBackground(tv_brush);
+        }
+        else if (elm.testResult == "Fail") {
+            QBrush tv_brush(QColor(255,102,102), Qt::SolidPattern);
+            testItem->setBackground(tv_brush);
+        }
     }
     m_tv_testcase->setModel(m_standardModel);
     m_tv_testcase->model()->setHeaderData(0, Qt::Horizontal, "TreeView");
+    m_tv_testcase->expandAll();
 
     return true;
 }
@@ -319,6 +354,7 @@ void MainWindow::updateTestCase()
     mod_data.name = m_le_name->text().toStdString();
     mod_data.full_name = "UID-"+m_lb_uid->text().toStdString()+": "+mod_data.name;
     mod_data.testType = m_cb_testtype->currentText().toStdString();
+    mod_data.testResult = m_cb_result->currentText().toStdString();
     mod_data.isTestCase = m_proj->data()->node_data[idx_got].isTestCase;
     mod_data.comment = m_te_comment->toPlainText().toStdString();
     mod_data.level = m_proj->data()->node_data[idx_got].level;
@@ -337,7 +373,7 @@ void MainWindow::updateTestCase()
 void MainWindow::initProject()
 {
     m_proj = new Project;
-    Node_data_t node_add {99, "Default", "UID-99: Default", 1, true, "", "", {{"", ""}}};
+    Node_data_t node_add {99, "Default", "UID-99: Default", 1, true, "", "Neutral", "", {{"", ""}}};
     m_proj->data()->node_data.push_back(node_add);
     m_proj->data()->max_level = 1;
 }
@@ -359,6 +395,9 @@ void MainWindow::clearTestarea()
     m_cb_testtype->clear();
     m_cb_testtype->addItems({"Acceptance Test", "Destructive Test", "Functional Test", "Performance Test",
                             "Regression Test", "Smoke Test", "Unit Test"});
+    m_cb_result->clear();
+    m_cb_result->addItems({"Neutral", "Pass", "Fail"});
+    updateResultGUI();
 
     m_lb_uid->clear();
     m_le_name->clear();
@@ -386,5 +425,19 @@ void MainWindow::updateConfirmGUI()
         m_le_tree_uid->setEnabled(false);
     } else {
         m_le_tree_uid->setEnabled(true);
+    }
+}
+
+
+void MainWindow::updateResultGUI()
+{
+    if (m_cb_result->currentText() == "Neutral"){
+        m_cb_result->setStyleSheet("QComboBox { background-color: rgb(192, 192, 192);}");
+    }
+    else if (m_cb_result->currentText() == "Pass"){
+        m_cb_result->setStyleSheet("QComboBox { background-color: rgb(0, 255, 128);}");
+    }
+    else if (m_cb_result->currentText() == "Fail"){
+        m_cb_result->setStyleSheet("QComboBox { background-color:  rgb(255, 102, 102);}");
     }
 }

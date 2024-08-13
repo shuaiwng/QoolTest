@@ -1,0 +1,61 @@
+<Root>
+    <Node>
+        <Info UID="0" Name="Installation" Level="1" isTestCase="0" TestType="Acceptance Test" TestResult="Neutral" Comment=""/>
+    </Node>
+    <Node>
+        <Info UID="1" Name="On Windows" Level="2" isTestCase="1" TestType="Acceptance Test" TestResult="Pass" Comment=""/>
+        <TestCase>
+            <StepIn>double-click on the MSI installer</StepIn>
+            <StepOut>all steps go through without issue</StepOut>
+            <StepIn>check the folder under "C:\Program Files"</StepIn>
+            <StepOut>folder has been installed</StepOut>
+        </TestCase>
+    </Node>
+    <Node>
+        <Info UID="2" Name="On Linux" Level="2" isTestCase="1" TestType="Acceptance Test" TestResult="Fail" Comment="Fail --&gt; No program info is shown in terminal !"/>
+        <TestCase>
+            <StepIn>unzip the tar and run install script</StepIn>
+            <StepOut>program is unzipped</StepOut>
+            <StepIn>type program name in terminal</StepIn>
+            <StepOut>program version is shown</StepOut>
+        </TestCase>
+    </Node>
+    <Node>
+        <Info UID="3" Name="Device Tests" Level="1" isTestCase="0" TestType="Smoke Test" TestResult="Neutral" Comment=""/>
+    </Node>
+    <Node>
+        <Info UID="4" Name="Connection Test" Level="2" isTestCase="1" TestType="Smoke Test" TestResult="Pass" Comment=""/>
+        <TestCase>
+            <StepIn>connect and initialize device</StepIn>
+            <StepOut>device is connected</StepOut>
+        </TestCase>
+    </Node>
+    <Node>
+        <Info UID="5" Name="Acquisition Tests" Level="2" isTestCase="1" TestType="Smoke Test" TestResult="Fail" Comment="Fail --&gt; no analysis data is shown."/>
+        <TestCase>
+            <StepIn>acquire a measurement against target</StepIn>
+            <StepOut>measurement shows target results</StepOut>
+            <StepIn>press "Analyse"</StepIn>
+            <StepOut>analysis data has been generated</StepOut>
+        </TestCase>
+    </Node>
+    <Node>
+        <Info UID="6" Name="Peripheral" Level="2" isTestCase="0" TestType="Smoke Test" TestResult="Neutral" Comment=""/>
+    </Node>
+    <Node>
+        <Info UID="7" Name="Motor" Level="3" isTestCase="1" TestType="Functional Test" TestResult="Pass" Comment=""/>
+        <TestCase>
+            <StepIn>start motor</StepIn>
+            <StepOut>motor is responding</StepOut>
+        </TestCase>
+    </Node>
+    <Node>
+        <Info UID="8" Name="Laser" Level="3" isTestCase="1" TestType="Smoke Test" TestResult="Pass" Comment=""/>
+        <TestCase>
+            <StepIn>turn on the Laser</StepIn>
+            <StepOut>Laser is initialized</StepOut>
+            <StepIn>run Laser test program</StepIn>
+            <StepOut>Laser operates as expected</StepOut>
+        </TestCase>
+    </Node>
+</Root>
